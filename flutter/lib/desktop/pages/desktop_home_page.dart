@@ -81,11 +81,12 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final isOutgoingOnly = bind.isOutgoingOnly();
     final children = <Widget>[
       // if (!isOutgoingOnly) buildPresetPasswordWarning(),
-      if (bind.isCustomClient())
-        Align(
-          alignment: Alignment.center,
-          // child: loadPowered(context),
-        ),
+      // if (bind.isCustomClient())
+        // Align(
+        //   alignment: Alignment.center,
+        //   child: loadPowered(context),
+        // ),
+      const SizedBox(height: 20),
       Align(
         alignment: Alignment.center,
         child: loadLogo(),
@@ -113,20 +114,30 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       ),
       // buildPluginEntry(),
     ];
-    if (isIncomingOnly) {
-      children.addAll([
-        Divider(),
-        OnlineStatusWidget(
-          onSvcStatusChanged: () {
-            if (isInHomePage()) {
-              Future.delayed(Duration(milliseconds: 300), () {
-                _updateWindowSize();
-              });
-            }
-          },
-        ).marginOnly(bottom: 6, right: 6)
-      ]);
-    }
+    Divider(),
+    OnlineStatusWidget(
+      onSvcStatusChanged: () {
+        if (isInHomePage()) {
+          Future.delayed(Duration(milliseconds: 300), () {
+            _updateWindowSize();
+          });
+        }
+      },
+    ).marginOnly(bottom: 6, right: 6)
+    // if (isIncomingOnly) {
+    //   children.addAll([
+    //     Divider(),
+    //     OnlineStatusWidget(
+    //       onSvcStatusChanged: () {
+    //         if (isInHomePage()) {
+    //           Future.delayed(Duration(milliseconds: 300), () {
+    //             _updateWindowSize();
+    //           });
+    //         }
+    //       },
+    //     ).marginOnly(bottom: 6, right: 6)
+    //   ]);
+    // }
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
     return ChangeNotifierProvider.value(
       value: gFFI.serverModel,
@@ -222,7 +233,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                                   ?.color
                                   ?.withOpacity(0.5)),
                         ).marginOnly(top: 5),
-                        buildPopupMenu(context)
+                        // buildPopupMenu(context)
                       ],
                     ),
                   ),
