@@ -80,22 +80,22 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final isIncomingOnly = bind.isIncomingOnly();
     final isOutgoingOnly = bind.isOutgoingOnly();
     final children = <Widget>[
-      if (!isOutgoingOnly) buildPresetPasswordWarning(),
+      // if (!isOutgoingOnly) buildPresetPasswordWarning(),
       if (bind.isCustomClient())
         Align(
           alignment: Alignment.center,
-          child: loadPowered(context),
+          // child: loadPowered(context),
         ),
       Align(
         alignment: Alignment.center,
         child: loadLogo(),
       ),
-      buildTip(context),
+      // buildTip(context),
       if (!isOutgoingOnly) buildIDBoard(context),
       if (!isOutgoingOnly) buildPasswordBoard(context),
       FutureBuilder<Widget>(
-        future: Future.value(
-            Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
+        // future: Future.value(
+        //     Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
         builder: (_, data) {
           if (data.hasData) {
             if (isIncomingOnly) {
@@ -111,7 +111,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           }
         },
       ),
-      buildPluginEntry(),
+      // buildPluginEntry(),
     ];
     if (isIncomingOnly) {
       children.addAll([
