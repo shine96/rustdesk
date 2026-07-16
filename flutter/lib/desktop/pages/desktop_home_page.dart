@@ -86,34 +86,35 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         //   alignment: Alignment.center,
         //   child: loadPowered(context),
         // ),
-      const SizedBox(height: 20),
+      const SizedBox(height: 16),
       Align(
         alignment: Alignment.center,
         child: loadLogo(),
       ),
+      const SizedBox(height: 16),
       // buildTip(context),
       if (!isOutgoingOnly) buildIDBoard(context),
       if (!isOutgoingOnly) buildPasswordBoard(context),
-      FutureBuilder<Widget>(
-        // future: Future.value(
-        //     Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
-        builder: (_, data) {
-          if (data.hasData) {
-            if (isIncomingOnly) {
-              if (isInHomePage()) {
-                Future.delayed(Duration(milliseconds: 300), () {
-                  _updateWindowSize();
-                });
-              }
-            }
-            return data.data!;
-          } else {
-            return const Offstage();
-          }
-        },
-      ),
+      // FutureBuilder<Widget>(
+      //   future: Future.value(
+      //       Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
+      //   builder: (_, data) {
+      //     if (data.hasData) {
+      //       if (isIncomingOnly) {
+      //         if (isInHomePage()) {
+      //           Future.delayed(Duration(milliseconds: 300), () {
+      //             _updateWindowSize();
+      //           });
+      //         }
+      //       }
+      //       return data.data!;
+      //     } else {
+      //       return const Offstage();
+      //     }
+      //   },
+      // ),
       // buildPluginEntry(),、
-      Divider(),
+      const Divider(),
       OnlineStatusWidget(
         onSvcStatusChanged: () {
           if (isInHomePage()) {
