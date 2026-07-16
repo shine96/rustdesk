@@ -6,6 +6,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart';
+import 'package:flutter_hbb/common/formatter/id_formatter.dart';
 import 'package:flutter_hbb/common/widgets/animated_rotation_widget.dart';
 import 'package:flutter_hbb/common/widgets/custom_password.dart';
 import 'package:flutter_hbb/consts.dart';
@@ -39,6 +40,12 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   final _leftPaneScrollController = ScrollController();
 
+  // 0 = remote assistance, 1 = general settings
+  var _leftSelectedIndex = 0.obs;
+
+  final _remoteIdController = TextEditingController();
+  final _remotePasswordController = TextEditingController();
+
   @override
   bool get wantKeepAlive => true;
   var systemError = '';
@@ -61,12 +68,29 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     super.build(context);
     final isIncomingOnly = bind.isIncomingOnly();
     return _buildBlock(
-        child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
       children: [
-        buildLeftPane(context),
-        if (!isIncomingOnly) const VerticalDivider(width: 1),
-        if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
+        // Online status at top
+        OnlineStatusWidget(
+          onSvcStatusChanged: () {
+            if (isInHomePage()) {
+              Future.delayed(Duration(milliseconds: 300), () {
+                _updateWindowSize();
+              });
+            }
+          },
+        ),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildLeftPane(context),
+              if (!isIncomingOnly) const VerticalDivider(width: 1),
+              if (!isIncomingOnly)
+                Expanded(child: buildRightPane(context)),
+            ],
+          ),
+        ),
       ],
     ));
   }
@@ -78,125 +102,230 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   Widget buildLeftPane(BuildContext context) {
     final isIncomingOnly = bind.isIncomingOnly();
-    final isOutgoingOnly = bind.isOutgoingOnly();
-    final children = <Widget>[
-      // if (!isOutgoingOnly) buildPresetPasswordWarning(),
-      // if (bind.isCustomClient())
-        // Align(
-        //   alignment: Alignment.center,
-        //   child: loadPowered(context),
-        // ),
-      const SizedBox(height: 16),
-      Align(
-        alignment: Alignment.center,
-        child: loadLogo(),
-      ),
-      const SizedBox(height: 16),
-      // buildTip(context),
-      if (!isOutgoingOnly) buildIDBoard(context),
-      if (!isOutgoingOnly) buildPasswordBoard(context),
-      // FutureBuilder<Widget>(
-      //   future: Future.value(
-      //       Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
-      //   builder: (_, data) {
-      //     if (data.hasData) {
-      //       if (isIncomingOnly) {
-      //         if (isInHomePage()) {
-      //           Future.delayed(Duration(milliseconds: 300), () {
-      //             _updateWindowSize();
-      //           });
-      //         }
-      //       }
-      //       return data.data!;
-      //     } else {
-      //       return const Offstage();
-      //     }
-      //   },
-      // ),
-      // buildPluginEntry(),、
-      const Divider(),
-      OnlineStatusWidget(
-        onSvcStatusChanged: () {
-          if (isInHomePage()) {
-            Future.delayed(Duration(milliseconds: 300), () {
-              _updateWindowSize();
-            });
-          }
-        },
-      ).marginOnly(bottom: 6, right: 6)
-    ];
 
-    // if (isIncomingOnly) {
-    //   children.addAll([
-    //     Divider(),
-    //     OnlineStatusWidget(
-    //       onSvcStatusChanged: () {
-    //         if (isInHomePage()) {
-    //           Future.delayed(Duration(milliseconds: 300), () {
-    //             _updateWindowSize();
-    //           });
-    //         }
-    //       },
-    //     ).marginOnly(bottom: 6, right: 6)
-    //   ]);
-    // }
+    // For incomingOnly mode, show original content (ID, password)
+    if (isIncomingOnly) {
+      final isOutgoingOnly = bind.isOutgoingOnly();
+      final children = <Widget>[
+        const SizedBox(height: 16),
+        Align(alignment: Alignment.center, child: loadLogo()),
+        const SizedBox(height: 16),
+        if (!isOutgoingOnly) buildIDBoard(context),
+        if (!isOutgoingOnly) buildPasswordBoard(context),
+      ];
+      return ChangeNotifierProvider.value(
+        value: gFFI.serverModel,
+        child: Container(
+          width: 280.0,
+          color: Theme.of(context).colorScheme.background,
+          child: Column(
+            children: [
+              SingleChildScrollView(
+                controller: _leftPaneScrollController,
+                child: Column(key: _childKey, children: children),
+              ),
+              Expanded(child: Container()),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Obx(() => Container(
+      width: 200.0,
+      color: Theme.of(context).colorScheme.background,
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          Align(alignment: Alignment.center, child: loadLogo()),
+          const SizedBox(height: 16),
+          const Divider(),
+          _buildLeftMenuItem(
+            context,
+            icon: Icons.computer_rounded,
+            label: 'Remote Assistance',
+            isSelected: _leftSelectedIndex.value == 0,
+            onTap: () => _leftSelectedIndex.value = 0,
+          ),
+          _buildLeftMenuItem(
+            context,
+            icon: Icons.settings_rounded,
+            label: 'General Settings',
+            isSelected: _leftSelectedIndex.value == 1,
+            onTap: () => _leftSelectedIndex.value = 1,
+          ),
+        ],
+      ),
+    ));
+  }
+
+  buildRightPane(BuildContext context) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Obx(() => IndexedStack(
+        index: _leftSelectedIndex.value,
+        children: [
+          _buildRemoteAssistanceContent(context),
+          _buildSettingsContent(context),
+        ],
+      )),
+    );
+  }
+
+  Widget _buildLeftMenuItem(BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
-    return ChangeNotifierProvider.value(
-      value: gFFI.serverModel,
+    return InkWell(
+      onTap: onTap,
       child: Container(
-        width: isIncomingOnly ? 280.0 : 200.0,
-        color: Theme.of(context).colorScheme.background,
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                SingleChildScrollView(
-                  controller: _leftPaneScrollController,
-                  child: Column(
-                    key: _childKey,
-                    children: children,
-                  ),
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: isSelected
+            ? BoxDecoration(
+                border: Border(
+                  left: BorderSide(color: MyTheme.accent, width: 3),
                 ),
-                Expanded(child: Container())
-              ],
-            ),
-            if (isOutgoingOnly)
-              Positioned(
-                bottom: 6,
-                left: 12,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    child: Obx(
-                      () => Icon(
-                        Icons.settings,
-                        color: _editHover.value
-                            ? textColor
-                            : Colors.grey.withOpacity(0.5),
-                        size: 22,
-                      ),
-                    ),
-                    onTap: () => {
-                      if (DesktopSettingPage.tabKeys.isNotEmpty)
-                        {
-                          DesktopSettingPage.switch2page(
-                              DesktopSettingPage.tabKeys[0])
-                        }
-                    },
-                    onHover: (value) => _editHover.value = value,
-                  ),
-                ),
+                color: Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withOpacity(0.3),
               )
+            : null,
+        child: Row(
+          children: [
+            Icon(icon,
+                size: 20,
+                color: isSelected
+                    ? MyTheme.accent
+                    : textColor?.withOpacity(0.6)),
+            const SizedBox(width: 12),
+            Text(
+              translate(label),
+              style: TextStyle(
+                fontSize: 14,
+                color: isSelected ? MyTheme.accent : textColor,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  buildRightPane(BuildContext context) {
+  Widget _buildRemoteAssistanceContent(BuildContext context) {
+    final isOutgoingOnly = bind.isOutgoingOnly();
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 20, bottom: 10),
+            child: Text(
+              translate('Your Desktop'),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.titleLarge?.color,
+              ),
+            ),
+          ),
+          if (!isOutgoingOnly) buildIDBoard(context),
+          const Divider(),
+          if (!isOutgoingOnly) buildPasswordBoard(context, onEditPassword: () {
+            _leftSelectedIndex.value = 1;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              DesktopSettingPage.switch2page(SettingsTabKey.safety);
+            });
+          }),
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 16, bottom: 8),
+            child: Text(
+              translate('Remote Computer'),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.titleLarge?.color,
+              ),
+            ),
+          ),
+          _buildRemoteConnectSection(context),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsContent(BuildContext context) {
+    return DesktopSettingPage(
+      key: const ValueKey('embedded_settings'),
+      initialTabkey: SettingsTabKey.general,
+    );
+  }
+
+  Widget _buildRemoteConnectSection(BuildContext context) {
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: ConnectionPage(),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: Theme.of(context).colorScheme.background),
+      ),
+      child: Column(
+        children: [
+          TextField(
+            controller: _remoteIdController,
+            keyboardType: TextInputType.visiblePassword,
+            style: const TextStyle(
+              fontFamily: 'WorkSans',
+              fontSize: 18,
+            ),
+            decoration: InputDecoration(
+              filled: false,
+              hintText: translate('Remote ID'),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+            ),
+            inputFormatters: [IDTextInputFormatter()],
+            onSubmitted: (_) => _onRemoteConnect(context),
+          ).workaroundFreezeLinuxMint(),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _remotePasswordController,
+            obscureText: true,
+            decoration: InputDecoration(
+              hintText: translate('Password'),
+              border: const OutlineInputBorder(),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+            ),
+          ).workaroundFreezeLinuxMint(),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 40,
+            child: ElevatedButton(
+              onPressed: () => _onRemoteConnect(context),
+              child: Text(translate('Connect')),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onRemoteConnect(BuildContext context) {
+    final id = _remoteIdController.text.trim();
+    if (id.isEmpty) return;
+    connect(
+      context,
+      id,
+      password: _remotePasswordController.text.trim().isEmpty
+          ? null
+          : _remotePasswordController.text.trim(),
     );
   }
 
@@ -293,17 +422,19 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
-  buildPasswordBoard(BuildContext context) {
+  buildPasswordBoard(BuildContext context, {VoidCallback? onEditPassword}) {
     return ChangeNotifierProvider.value(
         value: gFFI.serverModel,
         child: Consumer<ServerModel>(
           builder: (context, model, child) {
-            return buildPasswordBoard2(context, model);
+            return buildPasswordBoard2(context, model,
+                onEditPassword: onEditPassword);
           },
         ));
   }
 
-  buildPasswordBoard2(BuildContext context, ServerModel model) {
+  buildPasswordBoard2(BuildContext context, ServerModel model,
+      {VoidCallback? onEditPassword}) {
     RxBool refreshHover = false.obs;
     RxBool editHover = false.obs;
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
@@ -386,8 +517,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                               ).marginOnly(right: 8, top: 4),
                             ),
                           ),
-                          onTap: () => DesktopSettingPage.switch2page(
-                              SettingsTabKey.safety),
+                          onTap: () {
+                            if (onEditPassword != null) {
+                              onEditPassword();
+                            } else {
+                              DesktopSettingPage.switch2page(
+                                  SettingsTabKey.safety);
+                            }
+                          },
                           onHover: (value) => editHover.value = value,
                         ),
                     ],
@@ -892,6 +1029,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     _uniLinksSubscription?.cancel();
     Get.delete<RxBool>(tag: 'stop-service');
     _updateTimer?.cancel();
+    _remoteIdController.dispose();
+    _remotePasswordController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

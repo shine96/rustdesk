@@ -87,7 +87,7 @@ class DesktopSettingPage extends StatefulWidget {
         return;
       }
       if (Get.isRegistered<PageController>(tag: _kSettingPageControllerTag)) {
-        DesktopTabPage.onAddSetting(initialPage: page);
+        // Navigate within existing settings page without opening new tab
         PageController controller =
             Get.find<PageController>(tag: _kSettingPageControllerTag);
         Rx<SettingsTabKey> selected =

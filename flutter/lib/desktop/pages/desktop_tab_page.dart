@@ -39,7 +39,6 @@ class DesktopTabPage extends StatefulWidget {
 
 class _DesktopTabPageState extends State<DesktopTabPage> {
   final tabController = DesktopTabController(tabType: DesktopTabType.main);
-  var _menuPosition = RelativeRect.fromLTRB(0, 0, 0, 0);
 
   _DesktopTabPageState() {
     RemoteCountState.init();
@@ -97,20 +96,6 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
             backgroundColor: Theme.of(context).colorScheme.background,
             body: DesktopTab(
               controller: tabController,
-              tail: Offstage(
-                offstage: bind.isIncomingOnly() || bind.isDisableSettings(),
-                child: ActionIcon(
-                  message: 'Settings',
-                  icon: IconFont.menu,
-                  onTapDown: (details) {
-                    final x = details.globalPosition.dx;
-                    final y = details.globalPosition.dy;
-                    _menuPosition = RelativeRect.fromLTRB(x, y, x, y);
-                  },
-                  onTap: () => _showSettingsMenu(context),
-                  isClose: false,
-                ),
-              ),
             )));
     return isMacOS || kUseCompatibleUiMode
         ? tabWidget
@@ -121,43 +106,5 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
               child: tabWidget,
             ),
           );
-  }
-
-  void _showSettingsMenu(BuildContext context) {
-    final style = TextStyle(
-        color: Theme.of(context).textTheme.titleLarge?.color,
-        fontSize: 14.0,
-        fontWeight: FontWeight.normal);
-    showMenu<String>(
-      context: context,
-      position: _menuPosition,
-      elevation: 8,
-      items: [
-        PopupMenuItem<String>(
-          height: 36,
-          child: Text(translate('General'), style: style),
-          onTap: () => DesktopTabPage.onAddSetting(
-              initialPage: SettingsTabKey.general),
-        ),
-        PopupMenuItem<String>(
-          height: 36,
-          child: Text(translate('Security'), style: style),
-          onTap: () =>
-              DesktopTabPage.onAddSetting(initialPage: SettingsTabKey.safety),
-        ),
-        PopupMenuItem<String>(
-          height: 36,
-          child: Text(translate('Display'), style: style),
-          onTap: () => DesktopTabPage.onAddSetting(
-              initialPage: SettingsTabKey.display),
-        ),
-        PopupMenuItem<String>(
-          height: 36,
-          child: Text(translate('About'), style: style),
-          onTap: () =>
-              DesktopTabPage.onAddSetting(initialPage: SettingsTabKey.about),
-        ),
-      ],
-    );
   }
 }
