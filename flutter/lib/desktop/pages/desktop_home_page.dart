@@ -114,8 +114,18 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       //   },
       // ),
       // buildPluginEntry(),、
+      const Divider(),
+      OnlineStatusWidget(
+        onSvcStatusChanged: () {
+          if (isInHomePage()) {
+            Future.delayed(Duration(milliseconds: 300), () {
+              _updateWindowSize();
+            });
+          }
+        },
+      ).marginOnly(bottom: 6, right: 6)
     ];
-    
+
     // if (isIncomingOnly) {
     //   children.addAll([
     //     Divider(),
