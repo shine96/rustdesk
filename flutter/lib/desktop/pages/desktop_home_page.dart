@@ -68,29 +68,13 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     super.build(context);
     final isIncomingOnly = bind.isIncomingOnly();
     return _buildBlock(
-        child: Column(
+        child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Online status at top
-        OnlineStatusWidget(
-          onSvcStatusChanged: () {
-            if (isInHomePage()) {
-              Future.delayed(Duration(milliseconds: 300), () {
-                _updateWindowSize();
-              });
-            }
-          },
-        ),
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildLeftPane(context),
-              if (!isIncomingOnly) const VerticalDivider(width: 1),
-              if (!isIncomingOnly)
-                Expanded(child: buildRightPane(context)),
-            ],
-          ),
-        ),
+        buildLeftPane(context),
+        if (!isIncomingOnly) const VerticalDivider(width: 1),
+        if (!isIncomingOnly)
+          Expanded(child: buildRightPane(context)),
       ],
     ));
   }
@@ -107,9 +91,28 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     if (isIncomingOnly) {
       final isOutgoingOnly = bind.isOutgoingOnly();
       final children = <Widget>[
-        const SizedBox(height: 16),
-        Align(alignment: Alignment.center, child: loadLogo()),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              loadLogo(),
+              const SizedBox(width: 6),
+              Expanded(
+                child: OnlineStatusWidget(
+                  onSvcStatusChanged: () {
+                    if (isInHomePage()) {
+                      Future.delayed(Duration(milliseconds: 300), () {
+                        _updateWindowSize();
+                      });
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
         if (!isOutgoingOnly) buildIDBoard(context),
         if (!isOutgoingOnly) buildPasswordBoard(context),
       ];
@@ -136,21 +139,40 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       color: Theme.of(context).colorScheme.background,
       child: Column(
         children: [
-          const SizedBox(height: 16),
-          Align(alignment: Alignment.center, child: loadLogo()),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                loadLogo(),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: OnlineStatusWidget(
+                    onSvcStatusChanged: () {
+                      if (isInHomePage()) {
+                        Future.delayed(Duration(milliseconds: 300), () {
+                          _updateWindowSize();
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
           const Divider(),
           _buildLeftMenuItem(
             context,
             icon: Icons.computer_rounded,
-            label: 'Remote Assistance',
+            label: translate('Remote Assistance'),
             isSelected: _leftSelectedIndex.value == 0,
             onTap: () => _leftSelectedIndex.value = 0,
           ),
           _buildLeftMenuItem(
             context,
             icon: Icons.settings_rounded,
-            label: 'General Settings',
+            label: translate('General Settings'),
             isSelected: _leftSelectedIndex.value == 1,
             onTap: () => _leftSelectedIndex.value = 1,
           ),
@@ -232,14 +254,10 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               ),
             ),
           ),
-          if (!isOutgoingOnly) buildIDBoard(context),
-          const Divider(),
-          if (!isOutgoingOnly) buildPasswordBoard(context, onEditPassword: () {
-            _leftSelectedIndex.value = 1;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              DesktopSettingPage.switch2page(SettingsTabKey.safety);
-            });
-          }),
+          if (!isOutgoingOnly)
+            _buildIDPasswordRow(context, onEditPassword: () {
+              _leftSelectedIndex.value = 1;
+            }),
           const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 16, bottom: 8),
@@ -269,43 +287,53 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   Widget _buildRemoteConnectSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(13),
         border: Border.all(color: Theme.of(context).colorScheme.background),
       ),
-      child: Column(
+      child: Row(
         children: [
-          TextField(
-            controller: _remoteIdController,
-            keyboardType: TextInputType.visiblePassword,
-            style: const TextStyle(
-              fontFamily: 'WorkSans',
-              fontSize: 18,
-            ),
-            decoration: InputDecoration(
-              filled: false,
-              hintText: translate('Remote ID'),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-            ),
-            inputFormatters: [IDTextInputFormatter()],
-            onSubmitted: (_) => _onRemoteConnect(context),
-          ).workaroundFreezeLinuxMint(),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _remotePasswordController,
-            obscureText: true,
-            decoration: InputDecoration(
-              hintText: translate('Password'),
-              border: const OutlineInputBorder(),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-            ),
-          ).workaroundFreezeLinuxMint(),
-          const SizedBox(height: 16),
+          Expanded(
+            child: TextField(
+              controller: _remoteIdController,
+              keyboardType: TextInputType.visiblePassword,
+              style: const TextStyle(
+                fontFamily: 'WorkSans',
+                fontSize: 15,
+              ),
+              decoration: InputDecoration(
+                filled: false,
+                hintText: translate('Remote ID'),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              inputFormatters: [IDTextInputFormatter()],
+              onSubmitted: (_) => _onRemoteConnect(context),
+            ).workaroundFreezeLinuxMint(),
+          ),
+          const SizedBox(width: 8),
           SizedBox(
-            width: double.infinity,
+            width: 120,
+            child: TextField(
+              controller: _remotePasswordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: translate('Password'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              ),
+              style: const TextStyle(fontSize: 15),
+            ).workaroundFreezeLinuxMint(),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
             height: 40,
             child: ElevatedButton(
               onPressed: () => _onRemoteConnect(context),
@@ -326,6 +354,159 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       password: _remotePasswordController.text.trim().isEmpty
           ? null
           : _remotePasswordController.text.trim(),
+    );
+  }
+
+  Widget _buildIDPasswordRow(BuildContext context,
+      {VoidCallback? onEditPassword}) {
+    return ChangeNotifierProvider.value(
+      value: gFFI.serverModel,
+      child: Consumer<ServerModel>(
+        builder: (context, model, child) {
+          return _buildIDPasswordRow2(context, model,
+              onEditPassword: onEditPassword);
+        },
+      ),
+    );
+  }
+
+  Widget _buildIDPasswordRow2(BuildContext context, ServerModel model,
+      {VoidCallback? onEditPassword}) {
+    RxBool refreshHover = false.obs;
+    RxBool editHover = false.obs;
+    final textColor = Theme.of(context).textTheme.titleLarge?.color;
+    final showOneTime = model.approveMode != 'click' &&
+        model.verificationMethod != kUsePermanentPassword;
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 16, top: 8, bottom: 8),
+      height: 57,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ID section
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  translate("ID"),
+                  style: TextStyle(
+                      fontSize: 14, color: textColor?.withOpacity(0.5)),
+                ).marginOnly(top: 5),
+                Flexible(
+                  child: GestureDetector(
+                    onDoubleTap: () {
+                      Clipboard.setData(
+                          ClipboardData(text: model.serverId.text));
+                      showToast(translate("Copied"));
+                    },
+                    child: TextFormField(
+                      controller: model.serverId,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.only(top: 10, bottom: 10),
+                      ),
+                      style: const TextStyle(fontSize: 18),
+                    ).workaroundFreezeLinuxMint(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Vertical divider
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: Container(
+              width: 1,
+              decoration: BoxDecoration(
+                color: Theme.of(context).dividerColor,
+              ),
+            ),
+          ),
+          // Password section
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AutoSizeText(
+                  translate("One-time Password"),
+                  style: TextStyle(
+                      fontSize: 14, color: textColor?.withOpacity(0.5)),
+                  maxLines: 1,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onDoubleTap: () {
+                          if (showOneTime) {
+                            Clipboard.setData(ClipboardData(
+                                text: model.serverPasswd.text));
+                            showToast(translate("Copied"));
+                          }
+                        },
+                        child: TextFormField(
+                          controller: model.serverPasswd,
+                          readOnly: true,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding:
+                                EdgeInsets.only(top: 14, bottom: 10),
+                          ),
+                          style: const TextStyle(fontSize: 15),
+                        ).workaroundFreezeLinuxMint(),
+                      ),
+                    ),
+                    if (showOneTime)
+                      AnimatedRotationWidget(
+                        onPressed: () =>
+                            bind.mainUpdateTemporaryPassword(),
+                        child: Tooltip(
+                          message: translate('Refresh Password'),
+                          child: Obx(() => RotatedBox(
+                              quarterTurns: 2,
+                              child: Icon(
+                                Icons.refresh,
+                                color: refreshHover.value
+                                    ? textColor
+                                    : Color(0xFFDDDDDD),
+                                size: 18,
+                              ))),
+                        ),
+                        onHover: (value) => refreshHover.value = value,
+                      ).marginOnly(right: 4, top: 4),
+                    if (!bind.isDisableSettings())
+                      InkWell(
+                        child: Tooltip(
+                          message: translate('Change Password'),
+                          child: Obx(
+                            () => Icon(
+                              Icons.edit,
+                              color: editHover.value
+                                  ? textColor
+                                  : Color(0xFFDDDDDD),
+                              size: 18,
+                            ).marginOnly(right: 4, top: 4),
+                          ),
+                        ),
+                        onTap: () {
+                          if (onEditPassword != null) {
+                            onEditPassword();
+                          } else {
+                            DesktopSettingPage.switch2page(
+                                SettingsTabKey.safety);
+                          }
+                        },
+                        onHover: (value) => editHover.value = value,
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
