@@ -197,29 +197,6 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
       ),
     );
   }
-
-  Widget _buildBlock({required List<Widget> children}) {
-    // check both mouseMoveTime and videoConnCount
-    return Obx(() {
-      final videoConnBlock =
-          _canBeBlocked.value && stateGlobal.videoConnCount > 0;
-      return Stack(children: [
-        buildRemoteBlock(
-          block: _block,
-          mask: false,
-          use: canBeBlocked,
-          child: preventMouseKeyBuilder(
-            child: Row(children: children),
-            block: videoConnBlock,
-          ),
-        ),
-        if (videoConnBlock)
-          Container(
-            color: Colors.black.withOpacity(0.5),
-          )
-      ]);
-    });
-  }
 }
 
 //#region pages
