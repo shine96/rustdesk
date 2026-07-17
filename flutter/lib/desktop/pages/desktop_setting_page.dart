@@ -218,6 +218,8 @@ class _GeneralState extends State<_General> {
   Widget build(BuildContext context) {
     final scrollController = ScrollController();
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       controller: scrollController,
       children: [
         if (!isWeb) service(),
@@ -272,7 +274,38 @@ class _GeneralState extends State<_General> {
         return const Offstage();
       }
 
+      final statusColor = serviceStop.value
+          ? kColorWarn
+          : (stateGlobal.svcStatus.value == SvcStatus.ready
+              ? const Color.fromARGB(255, 50, 190, 166)
+              : (stateGlobal.svcStatus.value == SvcStatus.connecting
+                  ? kColorWarn
+                  : const Color.fromARGB(255, 224, 79, 95)));
+      final statusText = serviceStop.value
+          ? translate('Service is not running')
+          : stateGlobal.svcStatus.value == SvcStatus.connecting
+              ? translate('connecting_status')
+              : stateGlobal.svcStatus.value == SvcStatus.notReady
+                  ? translate('not_ready_status')
+                  : translate('Ready');
+
       return _Card(title: 'Service', children: [
+        Row(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: statusColor,
+              ),
+            ).marginOnly(left: _kContentHMargin, right: 8),
+            Text(
+              statusText,
+              style: const TextStyle(fontSize: _kContentFontSize),
+            ),
+          ],
+        ).marginOnly(bottom: 8),
         _Button(serviceStop.value ? 'Start' : 'Stop', () {
           () async {
             serviceBtnEnabled.value = false;
@@ -691,6 +724,7 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     return SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
         controller: scrollController,
         child: Column(
           children: [
@@ -1411,7 +1445,10 @@ class _NetworkState extends State<_Network> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ListView(controller: scrollController, children: [
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      controller: scrollController, children: [
       _lock(locked, 'Unlock Network Settings', () {
         locked = false;
         setState(() => {});
@@ -1604,7 +1641,10 @@ class _DisplayState extends State<_Display> {
   @override
   Widget build(BuildContext context) {
     final scrollController = ScrollController();
-    return ListView(controller: scrollController, children: [
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      controller: scrollController, children: [
       viewStyle(context),
       scrollStyle(context),
       imageQuality(context),
@@ -1880,6 +1920,8 @@ class _AccountState extends State<_Account> {
   Widget build(BuildContext context) {
     final scrollController = ScrollController();
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       controller: scrollController,
       children: [
         _Card(title: 'Account', children: [accountAction(), useInfo()]),
@@ -2028,6 +2070,8 @@ class _PluginState extends State<_Plugin> {
       value: pluginManager,
       child: Consumer<PluginManager>(builder: (context, model, child) {
         return ListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           controller: scrollController,
           children: model.plugins.map((entry) => pluginCard(entry)).toList(),
         ).marginOnly(bottom: _kListViewBottomMargin);
@@ -2068,7 +2112,10 @@ class __PrinterState extends State<_Printer> {
   @override
   Widget build(BuildContext context) {
     final scrollController = ScrollController();
-    return ListView(controller: scrollController, children: [
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      controller: scrollController, children: [
       outgoing(context),
       incoming(context),
     ]).marginOnly(bottom: _kListViewBottomMargin);
@@ -2233,6 +2280,7 @@ class _AboutState extends State<_About> {
       const linkStyle = TextStyle(decoration: TextDecoration.underline);
       final scrollController = ScrollController();
       return SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
         controller: scrollController,
         child: _Card(title: translate('About RustDesk'), children: [
           Column(

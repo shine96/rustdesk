@@ -380,6 +380,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 16, top: 8, bottom: 8),
       height: 57,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -515,6 +518,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 11),
       height: 57,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
@@ -623,6 +629,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         model.verificationMethod != kUsePermanentPassword;
     return Container(
       margin: EdgeInsets.only(left: 20.0, right: 16, top: 13, bottom: 13),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
