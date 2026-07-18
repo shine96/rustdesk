@@ -136,7 +136,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     }
 
     return Obx(() => Container(
-      width: 150.0,
+      width: 140.0,
       color: Theme.of(context).colorScheme.background,
       child: Column(
         children: [
