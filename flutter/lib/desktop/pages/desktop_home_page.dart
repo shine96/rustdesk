@@ -140,17 +140,6 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       color: Theme.of(context).colorScheme.background,
       child: Column(
         children: [
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              children: [
-                loadLogo(),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Divider(),
           _buildLeftMenuItem(
             context,
             icon: Icons.computer_rounded,
