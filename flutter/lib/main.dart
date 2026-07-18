@@ -408,7 +408,7 @@ WindowOptions getHiddenTitleBarWindowOptions(
     Size? size,
     bool center = false,
     bool? alwaysOnTop}) {
-  var defaultTitleBarStyle = TitleBarStyle.normal;
+  var defaultTitleBarStyle = TitleBarStyle.hidden;
   // we do not hide titlebar on win7 because of the frame overflow.
   if (kUseCompatibleUiMode) {
     defaultTitleBarStyle = TitleBarStyle.normal;
