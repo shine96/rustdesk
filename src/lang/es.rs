@@ -1,6 +1,7 @@
 lazy_static::lazy_static! {
 pub static ref T: std::collections::HashMap<&'static str, &'static str> =
     [
+        ("app_name", "RustDesk"),
         ("Status", "Estado"),
         ("Your Desktop", "Tu escritorio"),
         ("desk_tip", "Puedes acceder a tu escritorio con esta ID y contraseña."),

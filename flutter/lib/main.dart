@@ -290,7 +290,7 @@ void runMultiWindow(
 void runConnectionManagerScreen() async {
   await initEnv(kAppTypeConnectionManager);
   _runApp(
-    '',
+    translate('app_name'),
     const DesktopServerPage(),
     MyTheme.currentThemeMode(),
   );
