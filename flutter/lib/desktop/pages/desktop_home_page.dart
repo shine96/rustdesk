@@ -97,18 +97,6 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           child: Row(
             children: [
               loadLogo(),
-              const SizedBox(width: 6),
-              Expanded(
-                child: OnlineStatusWidget(
-                  onSvcStatusChanged: () {
-                    if (isInHomePage()) {
-                      Future.delayed(Duration(milliseconds: 300), () {
-                        _updateWindowSize();
-                      });
-                    }
-                  },
-                ),
-              ),
             ],
           ),
         ),
@@ -123,11 +111,24 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           color: Theme.of(context).colorScheme.background,
           child: Column(
             children: [
-              SingleChildScrollView(
-                controller: _leftPaneScrollController,
-                child: Column(key: _childKey, children: children),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: _leftPaneScrollController,
+                  child: Column(key: _childKey, children: children),
+                ),
               ),
-              Expanded(child: Container()),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: OnlineStatusWidget(
+                  onSvcStatusChanged: () {
+                    if (isInHomePage()) {
+                      Future.delayed(Duration(milliseconds: 300), () {
+                        _updateWindowSize();
+                      });
+                    }
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -135,7 +136,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     }
 
     return Obx(() => Container(
-      width: 200.0,
+      width: 150.0,
       color: Theme.of(context).colorScheme.background,
       child: Column(
         children: [
@@ -145,18 +146,6 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             child: Row(
               children: [
                 loadLogo(),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: OnlineStatusWidget(
-                    onSvcStatusChanged: () {
-                      if (isInHomePage()) {
-                        Future.delayed(Duration(milliseconds: 300), () {
-                          _updateWindowSize();
-                        });
-                      }
-                    },
-                  ),
-                ),
               ],
             ),
           ),
@@ -175,6 +164,19 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             label: translate('General Settings'),
             isSelected: _leftSelectedIndex.value == 1,
             onTap: () => _leftSelectedIndex.value = 1,
+          ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: OnlineStatusWidget(
+              onSvcStatusChanged: () {
+                if (isInHomePage()) {
+                  Future.delayed(Duration(milliseconds: 300), () {
+                    _updateWindowSize();
+                  });
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -370,6 +372,10 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // 「你的桌面」- ID 和一次性密码显示区域（横向并排）
+  // 背景色：纯白 (Colors.white)
+  // ═══════════════════════════════════════════════════════════════
   Widget _buildIDPasswordRow2(BuildContext context, ServerModel model,
       {VoidCallback? onEditPassword}) {
     RxBool refreshHover = false.obs;
@@ -407,6 +413,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       controller: model.serverId,
                       readOnly: true,
                       decoration: const InputDecoration(
+                        filled: false,
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.only(top: 10, bottom: 10),
                       ),
@@ -453,6 +460,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                           controller: model.serverPasswd,
                           readOnly: true,
                           decoration: const InputDecoration(
+                            filled: false,
                             border: InputBorder.none,
                             contentPadding:
                                 EdgeInsets.only(top: 14, bottom: 10),
@@ -518,6 +526,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 11),
       height: 57,
+      // 背景色：纯白
       decoration: const BoxDecoration(
         color: Colors.white,
       ),
@@ -565,7 +574,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       child: TextFormField(
                         controller: model.serverId,
                         readOnly: true,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
+                          filled: false,
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.only(top: 10, bottom: 10),
                         ),
@@ -620,6 +630,10 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         ));
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // 「你的桌面」- 一次性密码显示区域（incomingOnly 竖排）
+  // 背景色：纯白 (Colors.white)
+  // ═══════════════════════════════════════════════════════════════
   buildPasswordBoard2(BuildContext context, ServerModel model,
       {VoidCallback? onEditPassword}) {
     RxBool refreshHover = false.obs;
@@ -629,6 +643,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         model.verificationMethod != kUsePermanentPassword;
     return Container(
       margin: EdgeInsets.only(left: 20.0, right: 16, top: 13, bottom: 13),
+      // 背景色：纯白
       decoration: const BoxDecoration(
         color: Colors.white,
       ),
@@ -667,12 +682,13 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                           child: TextFormField(
                             controller: model.serverPasswd,
                             readOnly: true,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
+                              filled: false,
                               border: InputBorder.none,
                               contentPadding:
                                   EdgeInsets.only(top: 14, bottom: 10),
                             ),
-                            style: TextStyle(fontSize: 15),
+                            style: const TextStyle(fontSize: 15),
                           ).workaroundFreezeLinuxMint(),
                         ),
                       ),
